@@ -8,18 +8,18 @@ __author__ = 'drews'
 
 class TestPyVagrantfile(TestVagrantCase):
     def test___init___(self):
-        vagrantfile_string = load_vagrant_file('default')
+        vagrantfile_string = load_vagrant_file('default-shell')
         vagrantfile = VagrantParser.parses(content=vagrantfile_string)
         self.assertIsInstance(vagrantfile, Vagrantfile)
 
-        vagrantfile_path = get_vagrant_file_path('default')
+        vagrantfile_path = get_vagrant_file_path('default-shell')
         vagrantfile = VagrantParser.parsep(path=vagrantfile_path)
         self.assertIsInstance(vagrantfile, Vagrantfile)
 
         self.assertEqual(vagrantfile.configure_version, '2')
 
     def test_vm_attributes(self):
-        vagrantfile_path = get_vagrant_file_path('default')
+        vagrantfile_path = get_vagrant_file_path('default-shell')
         vagrantfile = VagrantParser.parsep(path=vagrantfile_path)
 
         self.assertHasAttr(vagrantfile, 'vm')
@@ -32,7 +32,7 @@ class TestPyVagrantfile(TestVagrantCase):
         self.assertEqual(vm.box_check_update, False)
 
     def test_network_attributes(self):
-        vagrantfile_path = get_vagrant_file_path('default')
+        vagrantfile_path = get_vagrant_file_path('default-shell')
         vagrantfile = VagrantParser.parsep(path=vagrantfile_path)
 
         self.assertHasAttr(vagrantfile.vm, 'network')
@@ -57,14 +57,14 @@ class TestPyVagrantfile(TestVagrantCase):
         self.assertTrue(network['public_network'])
 
     def test_synced_folder(self):
-        vagrantfile_path = get_vagrant_file_path('default')
+        vagrantfile_path = get_vagrant_file_path('default-shell')
         vagrantfile = VagrantParser.parsep(path=vagrantfile_path)
 
         self.assertHasAttr(vagrantfile.vm, 'synced_folder')
         self.assertTupleEqual(vagrantfile.vm.synced_folder, ('../data', '/vagrant_data'))
 
     def test_provider_virtualbox(self):
-        vagrantfile_path = get_vagrant_file_path('default')
+        vagrantfile_path = get_vagrant_file_path('default-shell')
         vagrantfile = VagrantParser.parsep(path=vagrantfile_path)
 
         self.assertHasAttr(vagrantfile.vm, 'provider')
@@ -76,3 +76,12 @@ class TestPyVagrantfile(TestVagrantCase):
 
         self.assertHasAttr(vb, 'memory')
         self.assertTrue(vb.memory, '1024')
+
+    def test_provisioner_shell(self):
+        vagrantfile_path = get_vagrant_file_path('default-shell')
+        vagrantfile = VagrantParser.parsep(path=vagrantfile_path)
+
+        self.assertHasAttr(vagrantfile.vm, 'provision')
+        provision = vagrantfile.vm.provision
+
+        self.assertKeyInDict('shell', provision)

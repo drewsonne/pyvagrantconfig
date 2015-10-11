@@ -13,6 +13,12 @@ class VagrantfileVm(object): pass
 
 class VagrantfileProviderVb(object): pass
 
+class VagrantfileProvisionShell(object): pass
+
+class VagrantfileProvisionChef(object): pass
+
+class VagrantfileProvisionPuppet(object): pass
+
 class VagrantfileNetworkForwardedPort(object):
     def __init__(self, guest, host):
         self.guest = int(guest)

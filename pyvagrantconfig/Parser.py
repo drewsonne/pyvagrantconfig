@@ -1,6 +1,6 @@
 from pypeg2 import *
 from pyvagrantconfig import Vagrantfile, VagrantfileVm, VagrantfileProviderVb, VagrantfileNetworkForwardedPort, \
-    VagrantfileNetworkPrivateNetwork
+    VagrantfileNetworkPrivateNetwork, VagrantfileProvisionShell
 
 __author__ = 'drews'
 
@@ -104,6 +104,10 @@ class VagrantParser(object):
                 self.progress_parser('vm.provision "')
                 provisioner_type = re.match(r'([^\'"]+)', self.parse_text()).group(0)
                 if provisioner_type == 'shell':
+
+                    if not hasattr(vagrantfile.vm, 'provision'):
+                        setattr(vagrantfile.vm, 'provision', { provisioner_type: VagrantfileProvisionShell() })
+
                     self.current_state = self.PARSING_PROVISIONER_SHELL
                     self.progress_parser_to_char(' ')
                 pass
@@ -113,7 +117,7 @@ class VagrantParser(object):
                     self.progress_parser('inline: ')
                     if self.parse_text()[0:3] == '<<-':
                         shell_content = self.parse_provisioner_shell_inline()
-                        setattr(vagrantfile.vm.provider[self.provider_type], 'inline', shell_content)
+                        setattr(vagrantfile.vm.provision['shell'], 'inline', shell_content)
                     else:
                         shell_content = self.parse_variable()
                     self.current_state = self.STATE_LOOKING_FOR_CONFIG
@@ -158,7 +162,8 @@ class VagrantParser(object):
                     self.progress_parser(re.match(r'([^,]+)', self.parse_text()).group(1))
                     port_forwarding_matches = re.match(r',\s*guest:\s?(\d+),\s?host:\s(\d+)', self.parse_text())
                     port_forwarding_matches = port_forwarding_matches.groups()
-                    forwarded_port = VagrantfileNetworkForwardedPort(port_forwarding_matches[0], port_forwarding_matches[1])
+                    forwarded_port = VagrantfileNetworkForwardedPort(port_forwarding_matches[0],
+                                                                     port_forwarding_matches[1])
                     if 'forwarded_port' not in network:
                         network = {
                             'forwarded_port': [forwarded_port]
@@ -209,7 +214,8 @@ class VagrantParser(object):
         if matches is not None:
             self.progress_parser(matches.group(0))
         else:
-            self.progress_parser(len(self.parse_text())) # If we have no carriage returns, we're at the end of the file.
+            self.progress_parser(
+                len(self.parse_text()))  # If we have no carriage returns, we're at the end of the file.
 
     def progress_parser_to_char(self, char):
         if char in [',']:
@@ -255,5 +261,5 @@ class VagrantParser(object):
                 if closing_delimiter == delimiter:
                     keep_parsing = False
         self.progress_to_eol()
-                    # shell_content = re.match(r'([^>]+)', self.parse_text()).group(0)
+        # shell_content = re.match(r'([^>]+)', self.parse_text()).group(0)
         return inline_script

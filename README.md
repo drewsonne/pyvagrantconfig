@@ -42,3 +42,8 @@ When testing this utility, you can install it and still edit the source files as
     $ cd $WORKSPACE/pyvagrantconfig
     $ pip install --editable .
 
+### Roadmap
+I intially tried to use pyPEG, but could not get a handle on it, so for now, we use a custom state parser.
+I want to move this to a PEG parser to make it easier to manage, but in the spirit of minimum viable product, it's up and out.
+
+ - Port parser from state parser to PEG parser.
