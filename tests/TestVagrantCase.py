@@ -9,6 +9,6 @@ class TestVagrantCase(TestCase):
             raise AssertionError("'{}' does not have attribute '{}'".format(object, attribute))
 
 
-    def assertKeyInDict(self, dictionary, key):
+    def assertKeyInDict(self, key, dictionary):
         if key not in dictionary:
             raise AssertionError("'{}' does not have key '{}'".format(dictionary, key))
