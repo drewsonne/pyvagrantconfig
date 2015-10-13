@@ -1,5 +1,6 @@
-# pyvagrantconfig
 ![image](https://travis-ci.org/drewsonne/pyvagrantconfig.svg)
+
+# pyvagrantconfig
 Write a description of what your utility does
 
 ## Setup
