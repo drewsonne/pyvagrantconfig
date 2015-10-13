@@ -15,7 +15,16 @@ class VagrantfileProviderVb(object): pass
 
 class VagrantfileProvisionShell(object): pass
 
-class VagrantfileProvisionChef(object): pass
+class VagrantfileProvisionChef(object):
+    def __init__(self):
+        self.roles = []
+        self.recipes = []
+
+    def add_recipe(self, new_recipe):
+        self.recipes.append(new_recipe)
+
+    def add_role(self, new_role):
+        self.roles.append(new_role)
 
 class VagrantfileProvisionPuppet(object): pass
 

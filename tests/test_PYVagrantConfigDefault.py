@@ -85,3 +85,7 @@ class TestPyVagrantfile(TestVagrantCase):
         provision = vagrantfile.vm.provision
 
         self.assertKeyInDict('shell', provision)
+
+        self.assertHasAttr(provision['shell'], 'inline')
+        self.assertEqual(provision['shell'].inline, "sudo apt-get update\n"
+                                                    "sudo apt-get install -y apache2")

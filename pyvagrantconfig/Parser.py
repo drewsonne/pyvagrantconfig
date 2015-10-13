@@ -1,6 +1,7 @@
+import json
 from pypeg2 import *
 from pyvagrantconfig import Vagrantfile, VagrantfileVm, VagrantfileProviderVb, VagrantfileNetworkForwardedPort, \
-    VagrantfileNetworkPrivateNetwork, VagrantfileProvisionShell
+    VagrantfileNetworkPrivateNetwork, VagrantfileProvisionShell, VagrantfileProvisionChef
 
 __author__ = 'drews'
 
@@ -15,6 +16,7 @@ class VagrantParser(object):
     PARSING_PROVIDER_VB = 6
     PARSING_PROVISIONER = 7
     PARSING_PROVISIONER_SHELL = 8
+    PARSING_PROVISIONER_CHEF = 9
 
     @classmethod
     def parses(cls, content):
@@ -103,14 +105,26 @@ class VagrantParser(object):
             elif self.current_state == self.PARSING_PROVISIONER:
                 self.progress_parser('vm.provision "')
                 provisioner_type = re.match(r'([^\'"]+)', self.parse_text()).group(0)
+                if not hasattr(vagrantfile.vm, 'provision'):
+                    setattr(vagrantfile.vm, 'provision', {})
+
                 if provisioner_type == 'shell':
 
-                    if not hasattr(vagrantfile.vm, 'provision'):
-                        setattr(vagrantfile.vm, 'provision', { provisioner_type: VagrantfileProvisionShell() })
+                    if provisioner_type not in vagrantfile.vm.provision:
+                        vagrantfile.vm.provision[provisioner_type] = VagrantfileProvisionShell()
 
                     self.current_state = self.PARSING_PROVISIONER_SHELL
                     self.progress_parser_to_char(' ')
-                pass
+                elif provisioner_type == 'chef_solo':
+                    if provider_type not in vagrantfile.vm.provision:
+                        vagrantfile.vm.provision[provisioner_type] = VagrantfileProvisionChef()
+                        self.current_state = self.PARSING_PROVISIONER_CHEF
+                        self.progress_parser('chef_solo" do |')
+
+            elif self.current_state == self.PARSING_PROVISIONER_CHEF:
+                if self.parse_text().startswith('chef'):
+                    vagrantfile.vm.provision['chef_solo'] = self.parse_chef_block()
+                    self.current_state = self.STATE_LOOKING_FOR_CONFIG
 
             elif self.current_state == self.PARSING_PROVISIONER_SHELL:
                 if self.parse_text().startswith('inline'):
@@ -210,9 +224,10 @@ class VagrantParser(object):
         return self.parse_text().startswith('#')
 
     def progress_to_eol(self):
-        matches = re.match('([^\n]*\n)', self.parse_text())
+        matches = re.match('([^\n]*)\n', self.parse_text())
         if matches is not None:
             self.progress_parser(matches.group(0))
+            # return matches.group(0).rstrip()
         else:
             self.progress_parser(
                 len(self.parse_text()))  # If we have no carriage returns, we're at the end of the file.
@@ -261,5 +276,78 @@ class VagrantParser(object):
                 if closing_delimiter == delimiter:
                     keep_parsing = False
         self.progress_to_eol()
-        # shell_content = re.match(r'([^>]+)', self.parse_text()).group(0)
+
+        # Clean indent
+        indent_match = re.match('^(\s+)', inline_script)
+        if indent_match:
+            indent = indent_match.group(0)
+            lines = inline_script.split("\n")
+            inline_script = [re.sub(indent_match.group(0), '', line) for line in lines]
+            inline_script = "\n".join(inline_script).rstrip().lstrip()
         return inline_script
+
+    def parse_chef_block(self):
+        yield_variable = re.match(r'([^\|]+)', self.parse_text()).group(1)
+        self.progress_to_eol()
+        in_yield_block = True
+        chef_options = VagrantfileProvisionChef()
+        while in_yield_block:
+            self.strip_indent()
+            if self.parse_text().startswith(yield_variable+'.'):
+                self.progress_parser(yield_variable+'.')
+                config_param = re.match(r'([^\s\(]+)', self.parse_text()).group(1)
+                if config_param == 'cookbooks_path':
+                    config = re.match(r'([^\s=]+)\s?=\s?\[(([\'"][^\'"]+[\'"],?\s?)+)', self.parse_text())
+                    if config is not None:
+                        cookbook_paths = config.groups()
+                        cookbook_paths = [cookbook_path.strip("'\" ") for cookbook_path in cookbook_paths[1].split(',')]
+                        setattr(chef_options, 'cookbooks_path', cookbook_paths)
+                        self.progress_to_eol()
+                        continue
+
+                if config_param == 'json':
+                    config_name = re.match(r'(json\s?=\s?)', self.parse_text())
+                    if config_name is not None:
+                        self.progress_parser(config_name.group(0))
+                    setattr(chef_options, 'json', self.parse_ruby_dict(self.parse_text()))
+                elif config_param in ['cookbooks_path', 'data_bags_path', 'roles_path']:
+                    # Pass option
+                    config = re.match(r'([^\s=]+)\s?=\s?[\'"]([^\'"]+)[\'"]', self.parse_text()).groups()
+                    setattr(chef_options, config[0], config[1])
+                    self.progress_to_eol()
+                else:
+                    config = re.match(r'([^\(\s]+)[\(\s][\'"]([^\'"]+)[\'"][\s\)]?', self.parse_text()).groups(0)
+                    if config[0] == 'add_role':
+                        chef_options.add_role(config[1])
+                    elif config[0] == 'add_recipe':
+                        chef_options.add_recipe(config[1])
+                    self.progress_to_eol()
+            elif self.parse_text().startswith('end'):
+                in_yield_block = False
+                self.progress_to_eol()
+        return chef_options
+
+    def parse_ruby_dict(self, ruby_dict):
+        find_brace = re.match(r'[\n\s]*(\{)', ruby_dict)
+        offset = 0
+        if find_brace is None:
+            offset = 1
+            ruby_dict = '{'+ruby_dict
+        ruby_dict = ruby_dict.lstrip(' =')
+        started_counting = False
+        bracket_counter = 0
+        char_counter = 0
+        for char in ruby_dict:
+            if char == '{':
+                bracket_counter += 1
+                started_counting = True
+            elif char == '}':
+                bracket_counter -= 1
+            char_counter +=1
+            if started_counting & (bracket_counter == 0):
+                break
+        self.progress_parser(char_counter+offset)
+        struct = re.sub(r'\s+', ' ', ruby_dict[0:char_counter])
+        struct = re.sub(r'=>', ':', struct)
+        return json.loads(struct)
+
