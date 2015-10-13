@@ -1,4 +1,10 @@
+import sys
+
 __author__ = 'drews'
+
+PY_VERSION = sys.version_info[:2]
+PY2 = (PY_VERSION[0] == 2)
+PY3 = (PY_VERSION[0] == 3)
 
 class Vagrantfile(object):
 

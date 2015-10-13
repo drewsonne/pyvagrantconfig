@@ -1,4 +1,6 @@
 import os
+from pyvagrantconfig import PY_VERSION
+
 __author__ = 'drews'
 
 
@@ -15,7 +17,11 @@ def get_vagrant_file_path(name):
     :param name:
     :return:
     """
-    return "{}/resources/vagrant-files/{}".format(get_test_root(), name)
+    if PY_VERSION == (2,6):
+        format = "{0}/resources/vagrant-files/{1}"
+    else:
+        format = "{}/resources/vagrant-files/{}"
+    return (format).format(get_test_root(), name)
 
 def load_vagrant_file(name):
     """

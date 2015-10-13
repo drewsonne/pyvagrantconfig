@@ -1,7 +1,6 @@
 import json
-from pypeg2 import *
-from pyvagrantconfig import Vagrantfile, VagrantfileVm, VagrantfileProviderVb, VagrantfileNetworkForwardedPort, \
-    VagrantfileNetworkPrivateNetwork, VagrantfileProvisionShell, VagrantfileProvisionChef
+from pyvagrantconfig import *
+import re
 
 __author__ = 'drews'
 
@@ -152,7 +151,7 @@ class VagrantParser(object):
                     self.progress_to_eol()
                     self.current_state = self.STATE_LOOKING_FOR_CONFIG
                 else:
-                    vb_provider_config_option = re.match(r'{}.([^\s]+)\s?=\s?([^\n]+)'.format(self.provider_prefix),
+                    vb_provider_config_option = re.match(r'{0}.([^\s]+)\s?=\s?([^\n]+)'.format(self.provider_prefix),
                                                          self.parse_text()).groups()
                     setattr(vagrantfile.vm.provider[self.provider_type], vb_provider_config_option[0],
                             vb_provider_config_option[1])
@@ -210,7 +209,7 @@ class VagrantParser(object):
         elif isinstance(progress_unit, str):
             self.current_position = self.current_position + len(progress_unit)
         else:
-            raise Exception("Unexpected progress_unit '{}'".format(progress_unit))
+            raise Exception("Unexpected progress_unit '{0}'".format(progress_unit))
 
     def parse_text(self):
         return self.vagrantfile[self.current_position:len(self.vagrantfile)]
@@ -235,7 +234,7 @@ class VagrantParser(object):
     def progress_parser_to_char(self, char):
         if char in [',']:
             char = '\,'
-        matches = re.match('([^{}]+)'.format(char), self.parse_text())
+        matches = re.match('([^{0}]+)'.format(char), self.parse_text())
         if matches is not None:
             self.progress_parser(matches.group(0))
 
