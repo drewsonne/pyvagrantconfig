@@ -50,7 +50,7 @@ class TestPyVagrantfile(TestVagrantCase):
         "modules" => ["mod_sec", "mod_php", "mod_cgi", "mod_java"]
       }
     }
-
+ 
     chef.add_recipe "apache"
     chef.add_recipe "mysql""")
 
