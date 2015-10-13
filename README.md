@@ -1,10 +1,15 @@
 [![Build Status](https://travis-ci.org/drewsonne/pyvagrantconfig.svg?branch=master)](https://travis-ci.org/drewsonne/pyvagrantconfig)
 
 # pyvagrantconfig
-Write a description of what your utility does
+Parses a vagrant file into a python object for inspect. Mainly used to read and build Vagrant file in python.
+I built this to help me write a utility in python which can build projects and convert Vagrantfiles to packer files.
 
-## Setup
-If there are any requirements for getting started (non-pip dependencies, external systems, etc.) add those here
+## Supported Directives
+
+ - Most vm.config directives,
+ - Chef provisioner
+ - Shell provisioner
+ - VB provider
 
 ## Deployment
 When this is ready to be deployed, you can upload it to the nordcloud pip server
@@ -48,4 +53,5 @@ When testing this utility, you can install it and still edit the source files as
 I intially tried to use pyPEG, but could not get a handle on it, so for now, we use a custom state parser.
 I want to move this to a PEG parser to make it easier to manage, but in the spirit of minimum viable product, it's up and out.
 
+ - This is currently way too specific. Needs to be rewritten to parse general ruby structures and extract details out of it, rather than looking for particular vagrant configurations.
  - Port parser from state parser to PEG parser.
