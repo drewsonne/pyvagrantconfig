@@ -38,3 +38,11 @@ class TestVagrantCase(TestCase):
             if tuple1 != tuple2:
                 raise AssertionError('{0} not equal to {1}'.format(tuple1, tuple2))
 
+
+        def assertListEqual(self, list1, list2):
+            if list1 != list2:
+                raise AssertionError('{0} not equal to {1}'.format(list1, list2))
+
+        def assertDictEqual(self, dict1, dict2):
+            if dict1 != dict2:
+                raise AssertionError('{0} not equal to {1}'.format(dict1, dict2))
