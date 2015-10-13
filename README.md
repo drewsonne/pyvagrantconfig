@@ -1,4 +1,4 @@
-![image](https://travis-ci.org/drewsonne/pyvagrantconfig.svg)
+[![Build Status](https://travis-ci.org/drewsonne/pyvagrantconfig.svg?branch=master)](https://travis-ci.org/drewsonne/pyvagrantconfig)
 
 # pyvagrantconfig
 Write a description of what your utility does
