@@ -44,7 +44,7 @@ class TestPyVagrantfile(TestVagrantCase):
         parser = VagrantParser(content='')
         parser.current_position = 0
         ruby_dict = parser.parse_ruby_dict("""
-    chef.json = {
+    {
       "apache" => {
         "listen_address" => "0.0.0.0",
         "modules" => ["mod_sec", "mod_php", "mod_cgi", "mod_java"]
