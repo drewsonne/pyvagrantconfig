@@ -5,23 +5,35 @@ PY_VERSION = sys.version_info[:2]
 PY2 = (PY_VERSION[0] == 2)
 PY3 = (PY_VERSION[0] == 3)
 
-requirements = [ ]
+try:
+    from pypandoc import convert
+
+    read_md = lambda f: convert(f, 'rst')
+except ImportError:
+    print("warning: pypandoc module not found, could not convert Markdown to RST")
+    read_md = lambda f: open(f, 'r').read()
+
+requirements = []
 
 if sys.version_info[:2] == (2, 6):
     requirements.append('ordereddict')
 
+package_version = '0.5.2'
+
 setup(
     name='pyvagrantfile',
     packages=find_packages(exclude=['tests*']),
-    version='0.5.2',
-    description='Parser to extract data from a Vagrantfile into a data struct readable by python.',
+    setup_requires=['pypandoc'],
+    version=package_version,
+    description='Parser to extract data from a Vagrantfile into a data struct readable by python',
+    long_description=read_md('README.md'),
     author='Drew J. Sonne',
     author_email='drew.sonne@gmail.com',
     url='https://github.com/drewsonne/pyvagrantfile',
-    download_url='https://github.com/drewsonne/pyvagrantfile/archive/0.5.2.tar.gz',
+    download_url='https://github.com/drewsonne/pyvagrantfile/archive/{0}.tar.gz'.format(package_version),
     include_package_data=True,
     install_requires=requirements,
-    keywords=['vagrant','parser','ruby'],
+    keywords=['vagrant', 'parser', 'ruby'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
