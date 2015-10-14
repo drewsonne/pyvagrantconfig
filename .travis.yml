@@ -9,6 +9,9 @@ python:
 os:
  - linux
  - osx
+matrix:
+  allow_failures:
+    - os: osx
 # command to install dependencies
 install: python setup.py -q install
 # command to run tests
