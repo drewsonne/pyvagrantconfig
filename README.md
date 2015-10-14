@@ -25,7 +25,7 @@ After it's on the pip server, you should be able to install on the client by run
 ## Usage
 
 ## Contributing
-If someone were to modify this utility, is there anything important about it that they should know?
+
 ### virtualenv
 When doing development and testing, it's good practice to use a virtualenv. A virtualenv is a sandboxed python environment which does not modify the system python installation
 You can install one as follows:
