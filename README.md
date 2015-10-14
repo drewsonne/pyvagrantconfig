@@ -12,13 +12,13 @@ I built this to help me write a utility in python which can build projects and c
  - VB provider
 
 ## Deployment
-When this is ready to be deployed, you can upload it to the nordcloud pip server
+When this is ready to be deployed, you can upload it to the pip server
 
     $ cd $WORKSPACE/pyvagrantconfig
     $ python setup.py sdist upload
 
 ## Installation
-After it's on the nordcloud pip server, you should be able to install on the client by running
+After it's on the pip server, you should be able to install on the client by running
 
     $ pip install pyvagrantconfig
 
