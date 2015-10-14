@@ -1,5 +1,5 @@
 from unittest import TestCase
-from pyvagrantconfig import PY_VERSION
+from pyvagrantfile import PY_VERSION
 
 __author__ = 'drews'
 

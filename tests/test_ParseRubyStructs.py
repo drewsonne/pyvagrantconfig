@@ -1,4 +1,4 @@
-from pyvagrantconfig.Parser import VagrantParser
+from pyvagrantfile.Parser import VagrantParser
 from tests.TestVagrantCase import TestVagrantCase
 
 __author__ = 'drews'

@@ -1,5 +1,5 @@
 import json
-from pyvagrantconfig import *
+from pyvagrantfile import *
 import re
 
 __author__ = 'drews'

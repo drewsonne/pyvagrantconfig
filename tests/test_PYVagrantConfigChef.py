@@ -1,7 +1,7 @@
 from tests.TestVagrantCase import TestVagrantCase
 from tests.helper import load_vagrant_file, get_vagrant_file_path
-from pyvagrantconfig.Parser import VagrantParser
-from pyvagrantconfig import Vagrantfile
+from pyvagrantfile.Parser import VagrantParser
+from pyvagrantfile import Vagrantfile
 
 __author__ = 'drews'
 

@@ -1,5 +1,5 @@
 import os
-from pyvagrantconfig import PY_VERSION
+from pyvagrantfile import PY_VERSION
 
 __author__ = 'drews'
 

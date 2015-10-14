@@ -11,14 +11,14 @@ if sys.version_info[:2] == (2, 6):
     requirements.append('ordereddict')
 
 setup(
-    name='pyvagrantconfig',
+    name='pyvagrantfile',
     packages=find_packages(exclude=['tests*']),
-    version='0.5.1',
+    version='0.5.2',
     description='Parser to extract data from a Vagrantfile into a data struct readable by python.',
     author='Drew J. Sonne',
     author_email='drew.sonne@gmail.com',
-    url='https://github.com/drewsonne/pyvagrantconfig',
-    download_url='https://github.com/drewsonne/pyvagrantconfig/archive/0.5.1.tar.gz',
+    url='https://github.com/drewsonne/pyvagrantfile',
+    download_url='https://github.com/drewsonne/pyvagrantfile/archive/0.5.2.tar.gz',
     include_package_data=True,
     install_requires=requirements,
     keywords=['vagrant','parser','ruby'],
