@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/drewsonne/pyvagrantconfig.svg?branch=master)](https://travis-ci.org/drewsonne/pyvagrantconfig)
+[![Build Status](https://travis-ci.org/drewsonne/pyvagrantfile.svg?branch=master)](https://travis-ci.org/drewsonne/pyvagrantfile)
 
 # pyvagrantconfig
 Parses a vagrant file into a python object for inspect. Mainly used to read and build Vagrant file in python.
