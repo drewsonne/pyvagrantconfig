@@ -10,7 +10,7 @@ requirements = []
 if sys.version_info[:2] == (2, 6):
     requirements.append('ordereddict')
 
-package_version = '0.5.6'
+package_version = '0.5.7'
 
 setup(
     name='pyvagrantfile',
