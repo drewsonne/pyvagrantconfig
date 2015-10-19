@@ -5,14 +5,6 @@ PY_VERSION = sys.version_info[:2]
 PY2 = (PY_VERSION[0] == 2)
 PY3 = (PY_VERSION[0] == 3)
 
-try:
-    from pypandoc import convert
-
-    read_md = lambda f: convert(f, 'rst')
-except ImportError:
-    print("warning: pypandoc module not found, could not convert Markdown to RST")
-    read_md = lambda f: open(f, 'r').read()
-
 requirements = []
 
 if sys.version_info[:2] == (2, 6):
@@ -26,7 +18,7 @@ setup(
     setup_requires=['pypandoc'],
     version=package_version,
     description='Parser to extract data from a Vagrantfile into a data struct readable by python',
-    long_description=read_md('README.md'),
+    long_description='README.rst',
     author='Drew J. Sonne',
     author_email='drew.sonne@gmail.com',
     url='https://github.com/drewsonne/pyvagrantfile',
