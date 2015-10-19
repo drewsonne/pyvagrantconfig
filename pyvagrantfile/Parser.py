@@ -6,16 +6,16 @@ __author__ = 'drews'
 
 
 class VagrantParser(object):
-    STATE_SEARCHING_FOR_HEADING = 0
-    STATE_LOOKING_FOR_CONFIG = 1
-    PARSING_VM_CONFIG = 2
-    PARSING_NETWORK = 3
-    PARSING_SYNCED_FOLDER = 4
-    PARSING_PROVIDER = 5
-    PARSING_PROVIDER_VB = 6
-    PARSING_PROVISIONER = 7
-    PARSING_PROVISIONER_SHELL = 8
-    PARSING_PROVISIONER_CHEF = 9
+    STATE_SEARCHING_FOR_HEADING = 'state_searching_for_header'
+    STATE_LOOKING_FOR_CONFIG = 'state_looking_for_config'
+    PARSING_VM_CONFIG = 'parsing_vm_config'
+    PARSING_NETWORK = 'parsing_network'
+    PARSING_SYNCED_FOLDER = 'parsing_synced_folder'
+    PARSING_PROVIDER = 'parsing_provider'
+    PARSING_PROVIDER_VB = 'parsing_provider_vb'
+    PARSING_PROVISIONER = 'parsing_provisioner'
+    PARSING_PROVISIONER_SHELL = 'parsing_provisioner_shell'
+    PARSING_PROVISIONER_CHEF = 'parsing_provisioner_chef'
 
     @classmethod
     def parses(cls, content):
@@ -68,6 +68,8 @@ class VagrantParser(object):
             elif self.current_state == self.PARSING_VM_CONFIG:
                 vm_config_type = re.match(r'vm.([^\.\s]+)', self.parse_text())
                 if vm_config_type is not None:
+                    if not hasattr(vagrantfile, 'vm'):
+                        setattr(vagrantfile, 'vm', VagrantfileVm())
                     vm_config_type = vm_config_type.group(1)
                     if vm_config_type in ['network']:
                         self.current_state = self.PARSING_NETWORK
@@ -103,7 +105,10 @@ class VagrantParser(object):
 
             elif self.current_state == self.PARSING_PROVISIONER:
                 self.progress_parser('vm.provision "')
-                provisioner_type = re.match(r'([^\'"]+)', self.parse_text()).group(0)
+                provisioner_type = re.match(r'([^\'" ]+)', self.parse_text())
+                if provisioner_type is None:
+                    provisioner_type = re.match(r'([^ ]+)', self.parse_text())
+                provisioner_type = provisioner_type.group(0)
                 if not hasattr(vagrantfile.vm, 'provision'):
                     setattr(vagrantfile.vm, 'provision', {})
 
@@ -115,10 +120,12 @@ class VagrantParser(object):
                     self.current_state = self.PARSING_PROVISIONER_SHELL
                     self.progress_parser_to_char(' ')
                 elif provisioner_type == 'chef_solo':
-                    if provider_type not in vagrantfile.vm.provision:
+                    if provisioner_type not in vagrantfile.vm.provision:
                         vagrantfile.vm.provision[provisioner_type] = VagrantfileProvisionChef()
                         self.current_state = self.PARSING_PROVISIONER_CHEF
-                        self.progress_parser('chef_solo" do |')
+                        self.progress_parser('chef_solo')
+                        self.progress_parser_to_char('|')
+                        self.progress_parser(1)
 
             elif self.current_state == self.PARSING_PROVISIONER_CHEF:
                 if self.parse_text().startswith('chef'):
@@ -292,15 +299,16 @@ class VagrantParser(object):
         chef_options = VagrantfileProvisionChef()
         while in_yield_block:
             self.strip_indent()
-            if self.parse_text().startswith(yield_variable+'.'):
-                self.progress_parser(yield_variable+'.')
+            if self.parse_text().startswith(yield_variable + '.'):
+                self.progress_parser(yield_variable + '.')
                 config_param = re.match(r'([^\s\(]+)', self.parse_text()).group(1)
-                if config_param == 'cookbooks_path':
-                    config = re.match(r'([^\s=]+)\s?=\s?\[(([\'"][^\'"]+[\'"],?\s?)+)', self.parse_text())
+                if config_param in ['run_list', 'cookbooks_path']:
+                    config = re.match(r'([^\s=]+)\s?=\s?\[[\n\s]*(([\'"][^\'"]+[\'"],?[\s\n]*)+)', self.parse_text())
                     if config is not None:
-                        cookbook_paths = config.groups()
-                        cookbook_paths = [cookbook_path.strip("'\" ") for cookbook_path in cookbook_paths[1].split(',')]
-                        setattr(chef_options, 'cookbooks_path', cookbook_paths)
+                        array_entries = config.groups()
+                        array_entries = [array_element.strip("'\" \n") for array_element in array_entries[1].split(',')]
+                        setattr(chef_options, config_param, array_entries)
+                        self.progress_parser_between('[]')
                         self.progress_to_eol()
                         continue
 
@@ -315,7 +323,11 @@ class VagrantParser(object):
                     setattr(chef_options, config[0], config[1])
                     self.progress_to_eol()
                 else:
-                    config = re.match(r'([^\(\s]+)[\(\s][\'"]([^\'"]+)[\'"][\s\)]?', self.parse_text()).groups(0)
+                    config = re.match(r'([^\(\s]+)[\(\s][\'"]([^\'"]+)[\'"][\s\)]?', self.parse_text())
+                    if config is None:
+                        pass
+                    else:
+                        config = config.groups()
                     if config[0] == 'add_role':
                         chef_options.add_role(config[1])
                     elif config[0] == 'add_recipe':
@@ -331,7 +343,7 @@ class VagrantParser(object):
         offset = 0
         if find_brace is None:
             offset = 1
-            ruby_dict = '{'+ruby_dict
+            ruby_dict = '{' + ruby_dict
         ruby_dict = ruby_dict.lstrip(' =')
         started_counting = False
         bracket_counter = 0
@@ -342,11 +354,28 @@ class VagrantParser(object):
                 started_counting = True
             elif char == '}':
                 bracket_counter -= 1
-            char_counter +=1
+            char_counter += 1
             if started_counting & (bracket_counter == 0):
                 break
-        self.progress_parser(char_counter+offset)
+        self.progress_parser(char_counter + offset)
         struct = re.sub(r'\s+', ' ', ruby_dict[0:char_counter])
         struct = re.sub(r'=>', ':', struct)
+        struct = re.sub("'", '"', struct)
         return json.loads(struct)
 
+    def progress_parser_between(self, object_def):
+        opener = object_def[0]
+        closer = object_def[1]
+        bookend_counter = 0
+        self.progress_parser_to_char(opener)
+        run = True
+        char = self.parse_text()[0]
+        while run:
+            char = self.parse_text()[0]
+            if char == opener:
+                bookend_counter += 1
+            elif char == closer:
+                bookend_counter -= 1
+            if bookend_counter == 0:
+                run = False
+            self.progress_parser(1)

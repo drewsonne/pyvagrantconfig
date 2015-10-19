@@ -43,7 +43,7 @@ class TestPyVagrantfile(TestVagrantCase):
         self.assertListEqual(chef_solo.recipes, ['apache', 'mysql'])
 
     def test_chef_provisioner2(self):
-        vagrantfile_string = load_vagrant_file('default-chef')
+        vagrantfile_string = load_vagrant_file('default-chef2')
         vagrantfile = VagrantParser.parses(content=vagrantfile_string)
 
         provisioner = vagrantfile.vm.provision
