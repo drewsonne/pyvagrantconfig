@@ -1,3 +1,4 @@
+import six
 from tests.TestVagrantCase import TestVagrantCase
 from tests.helper import load_vagrant_file, get_vagrant_file_path
 from pyvagrantfile.Parser import VagrantParser
@@ -11,7 +12,21 @@ class TestPyVagrantfile(TestVagrantCase):
         vagrantfile_string = load_vagrant_file('default-chef')
         vagrantfile = VagrantParser.parses(content=vagrantfile_string)
 
-        self.maxDiff = None
+        if six.PY2:
+            chef_json = {
+                u"apache": {
+                    u'listen_address': u'0.0.0.0',
+                    u'modules': [u'mod_sec', u'mod_php', u'mod_cgi', u'mod_java']
+                }
+            }
+        else:
+            chef_json = {
+                "apache": {
+                    'listen_address': '0.0.0.0',
+                    'modules': ['mod_sec', 'mod_php', 'mod_cgi', 'mod_java']
+                }
+            }
+
         self.assertDictEqual(vagrantfile.to_dict(), {
             'vm': {
                 'box': 'base',
@@ -26,12 +41,7 @@ class TestPyVagrantfile(TestVagrantCase):
                         'roles': ['web', 'database'],
                         'recipes': ['apache', 'mysql'],
                         'cookbooks_path': ['cookbooks', 'my_cookbooks'],
-                        'json': {
-                            u'apache': { # Json is decoded as utf-8 in python < 3
-                                u'listen_address': u'0.0.0.0',
-                                u'modules': [u'mod_sec', u'mod_php', u'mod_cgi', u'mod_java']
-                            }
-                        }
+                        'json': chef_json
                     }
                 },
                 'network': {
