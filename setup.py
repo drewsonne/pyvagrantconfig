@@ -5,7 +5,7 @@ PY_VERSION = sys.version_info[:2]
 PY2 = (PY_VERSION[0] == 2)
 PY3 = (PY_VERSION[0] == 3)
 
-requirements = []
+requirements = ['six']
 tests_require = []
 
 if sys.version_info[:2] == (2, 6):
