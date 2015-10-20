@@ -85,7 +85,7 @@ class VagrantfileProvisionShell(BaseObject):
 
 
 class VagrantfileProvisionChef(BaseObject):
-    serializable = ['cookbooks_path', 'data_bags_path', 'json', 'recipes', 'roles', 'roles_path']
+    serializable = ['cookbooks_path', 'data_bags_path', 'json', 'recipes', 'roles', 'roles_path', 'run_list']
 
     def __init__(self):
         self.roles = []
