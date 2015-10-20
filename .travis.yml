@@ -13,6 +13,8 @@ matrix:
   allow_failures:
     - os: osx
 # command to install dependencies
-install: python setup.py -q install
+install:
+  - python setup.py -q install
+  - pip install unittest2
 # command to run tests
 script: nosetests
