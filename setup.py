@@ -12,7 +12,7 @@ if sys.version_info[:2] == (2, 6):
     requirements.append('ordereddict')
     tests_require.append('unittest2')
 
-package_version = '0.5.8'
+package_version = '0.5.9'
 
 setup(
     name='pyvagrantfile',
