@@ -30,11 +30,6 @@ class VagrantParser(object):
         self.vagrantfile = content
 
     def parse(self):
-        # parsed = parse(
-        #     self.vagrantfile,
-        #     VagrantGrammar,
-        #     comment=comment_sh
-        # )
 
         vagrantfile = Vagrantfile()
 
@@ -161,7 +156,7 @@ class VagrantParser(object):
                     vb_provider_config_option = re.match(r'{0}.([^\s]+)\s?=\s?([^\n]+)'.format(self.provider_prefix),
                                                          self.parse_text()).groups()
                     setattr(vagrantfile.vm.provider[self.provider_type], vb_provider_config_option[0],
-                            vb_provider_config_option[1])
+                            vb_provider_config_option[1].strip("'\""))
                     self.progress_to_eol()
 
             elif self.current_state == self.PARSING_SYNCED_FOLDER:

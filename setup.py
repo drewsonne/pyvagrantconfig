@@ -6,9 +6,11 @@ PY2 = (PY_VERSION[0] == 2)
 PY3 = (PY_VERSION[0] == 3)
 
 requirements = []
+tests_require = []
 
 if sys.version_info[:2] == (2, 6):
     requirements.append('ordereddict')
+    tests_require.append('unittest2')
 
 package_version = '0.5.8'
 
@@ -24,6 +26,7 @@ setup(
     download_url='https://github.com/drewsonne/pyvagrantfile/archive/{0}.tar.gz'.format(package_version),
     include_package_data=True,
     install_requires=requirements,
+    tests_require=tests_require,
     keywords=['vagrant', 'parser', 'ruby'],
     classifiers=[
         'Development Status :: 4 - Beta',

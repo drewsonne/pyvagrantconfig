@@ -7,6 +7,52 @@ __author__ = 'drews'
 
 
 class TestPyVagrantfile(TestVagrantCase):
+    def test_to_dict(self):
+        vagrantfile_string = load_vagrant_file('default-chef')
+        vagrantfile = VagrantParser.parses(content=vagrantfile_string)
+
+        self.maxDiff = None
+        self.assertDictEqual(vagrantfile.to_dict(), {
+            'vm': {
+                'box': 'base',
+                'box_check_update': False,
+                'provision': {
+                    'shell': {
+                        'inline': 'sudo apt-get update\nsudo apt-get install -y apache2'
+                    },
+                    'chef_solo': {
+                        'data_bags_path': 'data_bags',
+                        'roles_path': 'roles',
+                        'roles': ['web', 'database'],
+                        'recipes': ['apache', 'mysql'],
+                        'cookbooks_path': ['cookbooks', 'my_cookbooks'],
+                        'json': {
+                            u'apache': { # Json is decoded as utf-8 in python < 3
+                                u'listen_address': u'0.0.0.0',
+                                u'modules': [u'mod_sec', u'mod_php', u'mod_cgi', u'mod_java']
+                            }
+                        }
+                    }
+                },
+                'network': {
+                    'forwarded_port': [{
+                        'host': 8080,
+                        'guest': 80
+                    }],
+                    'private_network': {
+                        'ip': '192.168.33.10'
+                    },
+                    'public_network': True
+                },
+                'provider': {
+                    'virtualbox': {
+                        'gui': True,
+                        'memory': '1024'
+                    }
+                }
+            }
+        })
+
     def test_chef_provisioner(self):
         vagrantfile_string = load_vagrant_file('default-chef')
         vagrantfile = VagrantParser.parses(content=vagrantfile_string)
