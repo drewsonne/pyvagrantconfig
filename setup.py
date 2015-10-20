@@ -12,14 +12,14 @@ if sys.version_info[:2] == (2, 6):
     requirements.append('ordereddict')
     tests_require.append('unittest2')
 
-package_version = '0.5.9'
+package_version = '0.5.11'
 
 setup(
     name='pyvagrantfile',
     packages=find_packages(exclude=['tests*']),
     version=package_version,
     description='Parser to extract data from a Vagrantfile into a data struct readable by python',
-    long_description='README.rst',
+    long_description=open('README.rst','r').read(),
     author='Drew J. Sonne',
     author_email='drew.sonne@gmail.com',
     url='https://github.com/drewsonne/pyvagrantfile',
